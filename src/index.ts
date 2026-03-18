@@ -860,6 +860,99 @@ const TOOLS = [
         pageSize: { type: 'number', description: 'Number of results per page (default: 50)' }
       }
     }
+  },
+
+  // Automation Script Tools
+  {
+    name: 'get_automation_scripts',
+    description: 'List all available automation scripts with their IDs, names, languages, parameters, and variable definitions. Use this to discover script IDs and required variables before running scripts.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        lang: { type: 'string', description: 'Language code' }
+      }
+    }
+  },
+  {
+    name: 'get_device_scripting_options',
+    description: 'Get available scripts, built-in actions, and credentials for a specific device. Returns scripts filtered by device OS/architecture, plus available execution credentials. Use before run_script_on_device to discover what can be run and with which credentials.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Device identifier' },
+        lang: { type: 'string', description: 'Language code' }
+      },
+      required: ['id']
+    }
+  },
+  {
+    name: 'run_script_on_device',
+    description: 'Run a script or built-in action on a device. For type SCRIPT, provide scriptId. For type ACTION, provide actionUid. Use get_device_scripting_options first to discover available scripts, actions, and credentials. Track execution via get_device_active_jobs or get_activities with the returned job UID. IMPORTANT: Always confirm with the user before executing. Describe what script will be run, on which device, with what parameters, and the execution context (runAs). Scripts can perform destructive or irreversible actions on devices. Never run a script without explicit user approval.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Device identifier' },
+        type: { type: 'string', enum: ['ACTION', 'SCRIPT'], description: 'Type of command to run' },
+        scriptId: { type: 'number', description: 'Script ID (required when type is SCRIPT)' },
+        actionUid: { type: 'string', description: 'Built-in action UUID (required when type is ACTION)' },
+        parameters: { type: 'string', description: 'Serialized script/action parameters' },
+        runAs: { type: 'string', description: 'Execution context / credential role (e.g. SYSTEM, LOGGED_ON_USER, LOCAL_ADMIN, DOMAIN_ADMIN)' }
+      },
+      required: ['id', 'type']
+    }
+  },
+
+  // Job Tracking Tools
+  {
+    name: 'get_active_jobs',
+    description: 'List all currently active/running jobs system-wide, including script executions. Filter by jobType or device filter.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        jobType: { type: 'string', description: 'Filter by job type' },
+        df: { type: 'string', description: 'Device filter' },
+        lang: { type: 'string', description: 'Language tag' },
+        tz: { type: 'string', description: 'Time zone' }
+      }
+    }
+  },
+  {
+    name: 'get_device_active_jobs',
+    description: 'List currently active/running jobs for a specific device, including script executions.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Device identifier' },
+        lang: { type: 'string', description: 'Language tag' },
+        tz: { type: 'string', description: 'Time zone' }
+      },
+      required: ['id']
+    }
+  },
+
+  // Activity Tracking Tools
+  {
+    name: 'get_activities',
+    description: 'List activity log entries in reverse chronological order. Filter by seriesUid to track a specific script execution, or by type to filter for SCRIPTING activities. Returns status and result but full script stdout/stderr is only available in the NinjaOne dashboard.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        class: { type: 'string', enum: ['SYSTEM', 'DEVICE', 'USER', 'ALL'], description: 'Activity class filter (default: ALL)' },
+        before: { type: 'string', description: 'Return activities before this date' },
+        after: { type: 'string', description: 'Return activities after this date' },
+        olderThan: { type: 'number', description: 'Return activities with ID less than this value' },
+        newerThan: { type: 'number', description: 'Return activities with ID greater than this value' },
+        type: { type: 'string', description: 'Activity type filter (e.g. SCRIPTING, ACTION, ACTIONSET)' },
+        status: { type: 'string', description: 'Activity status filter' },
+        user: { type: 'string', description: 'User filter' },
+        seriesUid: { type: 'string', description: 'Filter by job/series UID to track a specific script execution' },
+        df: { type: 'string', description: 'Device filter' },
+        pageSize: { type: 'number', description: 'Limit number of results (min: 10, max: 1000, default: 200)' },
+        lang: { type: 'string', description: 'Language tag' },
+        tz: { type: 'string', description: 'Time zone' },
+        sourceConfigUid: { type: 'string', description: 'Filter by source script config UID' }
+      }
+    }
   }
 ];
 
