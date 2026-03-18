@@ -658,4 +658,61 @@ export class NinjaOneAPI {
   async getDeviceSoftware(id: number): Promise<any> {
     return this.makeRequest(`/v2/device/${id}/software`);
   }
+
+  // Automation Scripts
+
+  async getAutomationScripts(lang?: string): Promise<any> {
+    return this.makeRequest(`/v2/automation/scripts${this.buildQuery({ lang })}`);
+  }
+
+  async getDeviceScriptingOptions(id: number, lang?: string): Promise<any> {
+    return this.makeRequest(`/v2/device/${id}/scripting/options${this.buildQuery({ lang })}`);
+  }
+
+  async runScriptOnDevice(
+    id: number,
+    type: 'SCRIPT' | 'ACTION',
+    scriptId?: number,
+    actionUid?: string,
+    parameters?: string,
+    runAs?: string
+  ): Promise<any> {
+    const body: any = { type };
+    if (type === 'SCRIPT' && scriptId !== undefined) body.id = scriptId;
+    if (type === 'ACTION' && actionUid !== undefined) body.uid = actionUid;
+    if (parameters !== undefined) body.parameters = parameters;
+    if (runAs !== undefined) body.runAs = runAs;
+    return this.makeRequest(`/v2/device/${id}/script/run`, 'POST', body);
+  }
+
+  // Jobs
+
+  async getActiveJobs(jobType?: string, df?: string, lang?: string, tz?: string): Promise<any> {
+    return this.makeRequest(`/v2/jobs${this.buildQuery({ jobType, df, lang, tz })}`);
+  }
+
+  async getDeviceActiveJobs(id: number, lang?: string, tz?: string): Promise<any> {
+    return this.makeRequest(`/v2/device/${id}/jobs${this.buildQuery({ lang, tz })}`);
+  }
+
+  // Activities
+
+  async getActivities(params: {
+    class?: string;
+    before?: string;
+    after?: string;
+    olderThan?: number;
+    newerThan?: number;
+    type?: string;
+    status?: string;
+    user?: string;
+    seriesUid?: string;
+    df?: string;
+    pageSize?: number;
+    lang?: string;
+    tz?: string;
+    sourceConfigUid?: string;
+  }): Promise<any> {
+    return this.makeRequest(`/v2/activities${this.buildQuery(params)}`);
+  }
 }
