@@ -1300,6 +1300,56 @@ class NinjaOneMCPServer {
       case 'get_policies':
         return this.api.getPolicies(args.templateOnly);
 
+      // Automation Scripts
+      case 'get_automation_scripts':
+        return this.api.getAutomationScripts(args.lang);
+      case 'get_device_scripting_options':
+        return this.api.getDeviceScriptingOptions(args.id, args.lang);
+      case 'run_script_on_device': {
+        if (args.type !== 'ACTION' && args.type !== 'SCRIPT') {
+          throw new McpError(ErrorCode.InvalidParams, 'type must be ACTION or SCRIPT');
+        }
+        if (args.type === 'SCRIPT' && args.scriptId == null) {
+          throw new McpError(ErrorCode.InvalidParams, 'scriptId is required when type is SCRIPT');
+        }
+        if (args.type === 'ACTION' && !args.actionUid) {
+          throw new McpError(ErrorCode.InvalidParams, 'actionUid is required when type is ACTION');
+        }
+        return this.api.runScriptOnDevice(
+          args.id,
+          args.type,
+          args.scriptId,
+          args.actionUid,
+          args.parameters,
+          args.runAs
+        );
+      }
+
+      // Jobs
+      case 'get_active_jobs':
+        return this.api.getActiveJobs(args.jobType, args.df, args.lang, args.tz);
+      case 'get_device_active_jobs':
+        return this.api.getDeviceActiveJobs(args.id, args.lang, args.tz);
+
+      // Activities
+      case 'get_activities':
+        return this.api.getActivities({
+          class: args.class,
+          before: args.before,
+          after: args.after,
+          olderThan: args.olderThan,
+          newerThan: args.newerThan,
+          type: args.type,
+          status: args.status,
+          user: args.user,
+          seriesUid: args.seriesUid,
+          df: args.df,
+          pageSize: args.pageSize,
+          lang: args.lang,
+          tz: args.tz,
+          sourceConfigUid: args.sourceConfigUid
+        });
+
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
